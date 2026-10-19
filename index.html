@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ayushman Bharat PM-JAY Assistant · Student Project</title>
+  <meta name="description" content="An unofficial WhatsApp chatbot that answers questions about the Ayushman Bharat PM-JAY health insurance scheme using RAG over the official scheme guidelines. Developed as a student project." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d1117; --bg-card: #161b27; --bg-card2: #1c2333;
+      --border: rgba(99,179,237,0.15); --accent: #4ea8de; --accent2: #63b3ed;
+      --green: #48bb78; --green-dim: rgba(72,187,120,0.12);
+      --amber: #f6ad55; --amber-dim: rgba(246,173,85,0.12);
+      --text: #e6edf3; --text-muted: #8b949e; --text-faint: #4a5568;
+      --radius: 16px; --radius-sm: 10px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;font-size:16px;line-height:1.7;min-height:100vh;overflow-x:hidden}
+    .orb{position:fixed;border-radius:50%;filter:blur(120px);opacity:.18;pointer-events:none;animation:drift 18s ease-in-out infinite alternate}
+    .orb-1{width:600px;height:600px;background:#4ea8de;top:-200px;left:-200px;animation-delay:0s}
+    .orb-2{width:500px;height:500px;background:#48bb78;bottom:-150px;right:-150px;animation-delay:-6s}
+    .orb-3{width:350px;height:350px;background:#9f7aea;top:40%;left:50%;animation-delay:-12s}
+    @keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(40px,30px) scale(1.08)}}
+    .container{max-width:860px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+    nav{position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);background:rgba(13,17,23,.75);border-bottom:1px solid var(--border);padding:14px 0}
+    nav .inner{max-width:860px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .nav-logo{font-family:"Outfit",sans-serif;font-weight:700;font-size:1.1rem;background:linear-gradient(90deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .nav-links{display:flex;gap:24px;list-style:none}
+    .nav-links a{color:var(--text-muted);text-decoration:none;font-size:.875rem;font-weight:500;transition:color .2s}
+    .nav-links a:hover{color:var(--text)}
+    .badge-unofficial{background:var(--amber-dim);border:1px solid rgba(246,173,85,.35);color:var(--amber);font-size:.7rem;font-weight:600;letter-spacing:.04em;padding:3px 10px;border-radius:999px;white-space:nowrap}
+    .hero{padding:100px 0 80px;text-align:center}
+    .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(78,168,222,.1);border:1px solid rgba(78,168,222,.25);border-radius:999px;padding:6px 18px;font-size:.8rem;font-weight:600;color:var(--accent2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:28px}
+    .hero-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse-dot 2s ease-in-out infinite}
+    @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+    .hero h1{font-family:"Outfit",sans-serif;font-size:clamp(2.4rem,5vw,3.6rem);font-weight:800;line-height:1.15;margin-bottom:20px}
+    .hero h1 .highlight{background:linear-gradient(100deg,#4ea8de 0%,#63b3ed 40%,#48bb78 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-sub{color:var(--text-muted);font-size:1.1rem;max-width:600px;margin:0 auto 40px}
+    .hero-cta{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#4ea8de,#48bb78);color:#0d1117;font-weight:700;font-size:.95rem;padding:14px 32px;border-radius:999px;text-decoration:none;transition:transform .2s,box-shadow .2s;box-shadow:0 0 30px rgba(78,168,222,.3)}
+    .hero-cta:hover{transform:translateY(-3px);box-shadow:0 8px 40px rgba(78,168,222,.45)}
+    .hero-cta svg{width:18px;height:18px}
+    .disclaimer-banner{background:var(--amber-dim);border:1px solid rgba(246,173,85,.3);border-radius:var(--radius);padding:18px 24px;display:flex;gap:14px;align-items:flex-start;margin-bottom:56px}
+    .disclaimer-banner .icon{font-size:1.4rem;flex-shrink:0;margin-top:1px}
+    .disclaimer-banner p{font-size:.9rem;color:#f6ad55}
+    .disclaimer-banner strong{color:#fbd38d}
+    .section{margin-bottom:72px}
+    .section-label{font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+    .section h2{font-family:"Outfit",sans-serif;font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700;margin-bottom:18px;color:var(--text)}
+    .section>p{color:var(--text-muted);max-width:640px;margin-bottom:32px}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+    .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:26px 24px;transition:border-color .25s,transform .25s,box-shadow .25s}
+    .card:hover{border-color:rgba(99,179,237,.4);transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.35)}
+    .card-icon{font-size:1.9rem;margin-bottom:14px;display:block}
+    .card h3{font-family:"Outfit",sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:8px;color:var(--text)}
+    .card p{font-size:.875rem;color:var(--text-muted);line-height:1.65}
+    .steps{display:flex;flex-direction:column;gap:0;margin-bottom:32px}
+    .step{display:flex;gap:20px;position:relative;padding-bottom:32px}
+    .step:last-child{padding-bottom:0}
+    .step-line{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+    .step-num{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--green));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;color:#0d1117;flex-shrink:0}
+    .step-connector{width:2px;flex:1;background:linear-gradient(to bottom,rgba(78,168,222,.35),transparent);margin-top:6px}
+    .step:last-child .step-connector{display:none}
+    .step-body{padding-top:8px}
+    .step-body h3{font-family:"Outfit",sans-serif;font-size:1rem;font-weight:700;margin-bottom:6px;color:var(--text)}
+    .step-body p{font-size:.875rem;color:var(--text-muted)}
+    .highlights{display:flex;flex-direction:column;gap:12px}
+    .highlight-row{display:flex;align-items:flex-start;gap:16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px 20px;transition:border-color .2s}
+    .highlight-row:hover{border-color:rgba(72,187,120,.35)}
+    .highlight-icon{font-size:1.5rem;flex-shrink:0;margin-top:1px}
+    .highlight-text strong{display:block;font-size:.95rem;font-weight:600;color:var(--text);margin-bottom:3px}
+    .highlight-text span{font-size:.85rem;color:var(--text-muted)}
+    .tech-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+    .chip{background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 16px;font-size:.82rem;font-weight:600;color:var(--accent2);display:flex;align-items:center;gap:7px;transition:border-color .2s,transform .2s}
+    .chip:hover{border-color:var(--accent);transform:translateY(-2px)}
+    .chip .dot-chip{width:7px;height:7px;border-radius:50%;background:var(--green)}
+    #privacy{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:40px 36px}
+    #privacy .section-label{color:var(--green)}
+    .privacy-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:28px}
+    .privacy-block{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:20px 18px}
+    .privacy-block .pb-icon{font-size:1.5rem;margin-bottom:10px;display:block}
+    .privacy-block h4{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:6px}
+    .privacy-block p{font-size:.82rem;color:var(--text-muted);line-height:1.6}
+    .contact-box{margin-top:24px;background:var(--green-dim);border:1px solid rgba(72,187,120,.25);border-radius:var(--radius-sm);padding:18px 20px;font-size:.875rem;color:#9ae6b4}
+    .contact-box strong{color:#68d391}
+    .contact-box a{color:#68d391}
+    footer{border-top:1px solid var(--border);padding:36px 0;text-align:center}
+    footer p{font-size:.82rem;color:var(--text-faint);line-height:1.9}
+    footer a{color:var(--text-muted);text-decoration:none}
+    footer a:hover{color:var(--text)}
+    @media(max-width:600px){.hero{padding:70px 0 56px}.nav-links{gap:14px}#privacy{padding:28px 20px}}
+  </style>
+</head>
+<body>
+  <div class="orb orb-1" aria-hidden="true"></div>
+  <div class="orb orb-2" aria-hidden="true"></div>
+  <div class="orb orb-3" aria-hidden="true"></div>
+
+  <nav role="navigation" aria-label="Main navigation">
+    <div class="inner">
+      <span class="nav-logo">?? PM-JAY Assistant</span>
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#scheme">Scheme Facts</a></li>
+        <li><a href="#privacy">Privacy</a></li>
+      </ul>
+      <span class="badge-unofficial">Unofficial</span>
+    </div>
+  </nav>
+
+  <header class="container hero">
+    <div class="hero-eyebrow"><span class="dot"></span>Student Project · WhatsApp Chatbot</div>
+    <h1><span style="display:block">Your PM-JAY</span><span class="highlight">Health Scheme Assistant</span></h1>
+    <p class="hero-sub">Ask questions about the <strong>Ayushman Bharat PM-JAY</strong> scheme in plain language — eligibility, coverage, hospitals, and more — right inside WhatsApp.</p>
+    <a href="#about" class="hero-cta" id="hero-cta-btn">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
+      Explore the Bot
+    </a>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="disclaimer-banner" role="note">
+        <span class="icon">??</span>
+        <p><strong>Unofficial student project.</strong> Not affiliated with, endorsed by, or operated by the Government of India or the National Health Authority. Information is for educational purposes only. Always verify on <strong>pmjay.gov.in</strong> or call <strong>14555</strong>.</p>
+      </div>
+
+      <section class="section" id="about" aria-labelledby="about-heading">
+        <p class="section-label">About the Project</p>
+        <h2 id="about-heading">What does this bot do?</h2>
+        <p>Many eligible families remain unaware of their entitlements under Ayushman Bharat PM-JAY. This bot was built as a student project to bridge that information gap — answering common questions instantly, in plain language, over WhatsApp.</p>
+        <div class="cards">
+          <div class="card" id="card-eligibility">
+            <span class="card-icon">??</span>
+            <h3>Check Eligibility</h3>
+            <p>Explains who qualifies (SECC 2011 database, senior citizens 70+) and how to verify status online or at a Common Service Centre.</p>
+          </div>
+          <div class="card" id="card-coverage">
+            <span class="card-icon">??</span>
+            <h3>Coverage Details</h3>
+            <p>Covers the ?5 lakh annual family floater benefit, cashless treatment, pre-existing conditions, pre/post-hospitalisation expenses, and what is <em>not</em> covered.</p>
+          </div>
+          <div class="card" id="card-hospitals">
+            <span class="card-icon">???</span>
+            <h3>Find Hospitals</h3>
+            <p>Guides users on finding empanelled hospitals nationwide and explains portability — treatment is available in any state.</p>
+          </div>
+          <div class="card" id="card-card">
+            <span class="card-icon">??</span>
+            <h3>Ayushman Card</h3>
+            <p>Explains how to get the Ayushman card at CSCs, empanelled hospital Ayushman Mitra desks, or through the official Ayushman app with Aadhaar.</p>
+          </div>
+          <div class="card" id="card-helpline">
+            <span class="card-icon">??</span>
+            <h3>Helpline &amp; Links</h3>
+            <p>Always refers users to the official helpline (<strong>14555</strong>) and site (<strong>pmjay.gov.in</strong>) when the answer falls outside the knowledge base.</p>
+          </div>
+          <div class="card" id="card-rag">
+            <span class="card-icon">??</span>
+            <h3>Grounded Answers</h3>
+            <p>Uses Retrieval-Augmented Generation (RAG): the LLM answers <em>only</em> from the official scheme text and states clearly when it doesn't know.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="how-it-works" aria-labelledby="how-heading">
+        <p class="section-label">Under the Hood</p>
+        <h2 id="how-heading">How the bot works</h2>
+        <p>A lightweight RAG pipeline keeps responses accurate and prevents hallucination.</p>
+        <div class="steps" role="list">
+          <div class="step" role="listitem">
+            <div class="step-line"><div class="step-num">1</div><div class="step-connector"></div></div>
+            <div class="step-body"><h3>Message arrives via WhatsApp</h3><p>The user sends a text message. A FastAPI webhook receives it and queues a background task.</p></div>
+          </div>
+          <div class="step" role="listitem">
+            <div class="step-line"><div class="step-num">2</div><div class="step-connector"></div></div>
+            <div class="step-body"><h3>Intent check (first message)</h3><p>The LLM checks whether the message is about Ayushman Bharat. Off-topic queries receive a polite redirect.</p></div>
+          </div>
+          <div class="step" role="listitem">
+            <div class="step-line"><div class="step-num">3</div><div class="step-connector"></div></div>
+            <div class="step-body"><h3>Semantic search over the knowledge base</h3><p>The message is embedded and cosine-similarity matched against paragraphs from the official scheme guidelines.</p></div>
+          </div>
+          <div class="step" role="listitem">
+            <div class="step-line"><div class="step-num">4</div><div class="step-connector"></div></div>
+            <div class="step-body"><h3>LLM generates a grounded reply</h3><p>The model answers <em>only</em> from the retrieved text. If the answer isn't there, it refers the user to the official helpline.</p></div>
+          </div>
+          <div class="step" role="listitem">
+            <div class="step-line"><div class="step-num">5</div><div class="step-connector"></div></div>
+            <div class="step-body"><h3>Reply sent back via WhatsApp Cloud API</h3><p>The formatted response (and an intro video on first contact) is sent via the Meta WhatsApp Business Cloud API.</p></div>
+          </div>
+        </div>
+        <div class="tech-chips" aria-label="Technologies used">
+          <span class="chip"><span class="dot-chip"></span>Python 3.11</span>
+          <span class="chip"><span class="dot-chip"></span>FastAPI</span>
+          <span class="chip"><span class="dot-chip"></span>Mistral AI</span>
+          <span class="chip"><span class="dot-chip"></span>RAG (cosine similarity)</span>
+          <span class="chip"><span class="dot-chip"></span>WhatsApp Cloud API</span>
+          <span class="chip"><span class="dot-chip"></span>ngrok</span>
+        </div>
+      </section>
+
+      <section class="section" id="scheme" aria-labelledby="scheme-heading">
+        <p class="section-label">About the Scheme</p>
+        <h2 id="scheme-heading">Ayushman Bharat PM-JAY — Key Facts</h2>
+        <p>Quick reference to the most important provisions. Always verify details on <a href="https://pmjay.gov.in" target="_blank" rel="noopener" style="color:var(--accent2)">pmjay.gov.in</a>.</p>
+        <div class="highlights" role="list">
+          <div class="highlight-row" role="listitem" id="fact-launch"><span class="highlight-icon">???</span><div class="highlight-text"><strong>Launched 23 September 2018</strong><span>India's largest government-funded health assurance scheme, covering over 50 crore beneficiaries from economically vulnerable families.</span></div></div>
+          <div class="highlight-row" role="listitem" id="fact-cover"><span class="highlight-icon">??</span><div class="highlight-text"><strong>?5 lakh cover per family per year</strong><span>Family floater basis — any member can use any portion for secondary and tertiary hospitalisation.</span></div></div>
+          <div class="highlight-row" role="listitem" id="fact-cashless"><span class="highlight-icon">??</span><div class="highlight-text"><strong>Cashless &amp; paperless treatment</strong><span>At empanelled public and private hospitals across India. No payment at the hospital for covered treatments.</span></div></div>
+          <div class="highlight-row" role="listitem" id="fact-preexisting"><span class="highlight-icon">?</span><div class="highlight-text"><strong>Pre-existing conditions covered from Day 1</strong><span>No waiting period. Pre- and post-hospitalisation expenses also covered.</span></div></div>
+          <div class="highlight-row" role="listitem" id="fact-senior"><span class="highlight-icon">??</span><div class="highlight-text"><strong>Senior citizens 70+ covered irrespective of income</strong><span>Under the Ayushman Vay Vandana Card, all citizens aged 70 and above are eligible regardless of family income.</span></div></div>
+          <div class="highlight-row" role="listitem" id="fact-portable"><span class="highlight-icon">????</span><div class="highlight-text"><strong>Portable across all of India</strong><span>Treatment available at any empanelled hospital in any state — not just the home state.</span></div></div>
+          <div class="highlight-row" role="listitem" id="fact-helpline"><span class="highlight-icon">??</span><div class="highlight-text"><strong>Official helpline: 14555 / 1800-111-565</strong><span>For eligibility queries, complaints, or hospital lookup. Official website: pmjay.gov.in.</span></div></div>
+        </div>
+      </section>
+
+      <section class="section" id="privacy" aria-labelledby="privacy-heading">
+        <p class="section-label">Privacy Policy</p>
+        <h2 id="privacy-heading">Your privacy matters</h2>
+        <p>This is a non-commercial student research project. Data collection is kept to the absolute minimum required for the bot to function.</p>
+        <div class="privacy-grid">
+          <div class="privacy-block" id="privacy-collect">
+            <span class="pb-icon">??</span>
+            <h4>What we collect</h4>
+            <p>Only the <strong>text messages</strong> you send to the bot, your <strong>WhatsApp phone number</strong> (supplied automatically by the WhatsApp Cloud API so we can reply to you), and the <strong>timestamps</strong> of those messages.</p>
+          </div>
+          <div class="privacy-block" id="privacy-no-collect">
+            <span class="pb-icon">??</span>
+            <h4>What we do NOT collect</h4>
+            <p>We do not collect your name, location, Aadhaar details, financial information, or any other personal data. We do not use tracking cookies or analytics.</p>
+          </div>
+          <div class="privacy-block" id="privacy-use">
+            <span class="pb-icon">??</span>
+            <h4>How we use your data</h4>
+            <p>Your messages are used solely to generate and return a response. Conversation history may be retained temporarily during a session for context, and may be reviewed by the project team for research and quality improvement.</p>
+          </div>
+          <div class="privacy-block" id="privacy-share">
+            <span class="pb-icon">??</span>
+            <h4>Data sharing</h4>
+            <p>Message text is sent to <strong>Mistral AI's API</strong> to generate responses. We do not sell, rent, or share your data with any other third party. Mistral AI's own privacy policy applies to that processing.</p>
+          </div>
+          <div class="privacy-block" id="privacy-retention">
+            <span class="pb-icon">???</span>
+            <h4>Retention</h4>
+            <p>Data is retained only as long as necessary for the project. After the project concludes, all collected data will be deleted. You may request deletion at any time by contacting us.</p>
+          </div>
+          <div class="privacy-block" id="privacy-minors">
+            <span class="pb-icon">??</span>
+            <h4>No data from minors</h4>
+            <p>This bot is intended for users aged 18 and above. We do not knowingly collect data from minors. If you believe data from a minor has been submitted, please contact us immediately for deletion.</p>
+          </div>
+        </div>
+        <div class="contact-box" id="privacy-contact" role="note">
+          <strong>?? Contact us for data or privacy questions</strong><br />
+          To ask about this privacy policy, request deletion of your data, or report a concern, please open an issue on the
+          <a href="https://github.com" target="_blank" rel="noopener">GitHub repository</a>
+          or email <strong>[your-email@example.com]</strong>. We will respond within 7 days.
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer role="contentinfo">
+    <div class="container">
+      <p>
+        Built with ?? as an <strong>unofficial student project</strong> · Not affiliated with the Government of India or NHA<br />
+        For official information visit <a href="https://pmjay.gov.in" target="_blank" rel="noopener">pmjay.gov.in</a> or call <a href="tel:14555">14555</a><br />
+        <small style="color:var(--text-faint)">© 2025 · Content may not reflect the most current scheme details</small>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
